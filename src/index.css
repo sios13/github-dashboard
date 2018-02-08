@@ -1,0 +1,62 @@
+body {background-color:rgba(0,0,0,0.05);}
+
+.sidebar {
+    padding:0;
+    background-color:rgb(173, 196, 230);
+}
+.sidebar__title {
+    text-align:center;
+    color:white;
+    padding:20px 0px;
+}
+.sidebar__image {
+    width:80%;
+    display:block;
+    margin:0 auto;
+    border-radius:50%;
+}
+.sidebar__user {
+    color:white;
+    text-align:center;
+    padding:10px;
+    margin-bottom:10px;
+}
+.sidebar__item {
+    float:left;
+    width:100%;
+    padding:10px 10px;
+    border-bottom:1px solid rgba(0,0,0,0.1);
+    color:white;
+}
+.sidebar__item:hover {
+    text-decoration:none;
+    color:white;
+    background-color:rgba(0,0,0,0.025);
+}
+
+.cbox {
+    background-color:white;
+    margin-top:15px;
+    margin-right:5px;
+    margin-left:5px;
+    padding:10px;
+}
+.cbox__title {
+    width:100%;
+    font-size:26px;
+}
+
+.organisation {
+    float:left;
+    padding:20px;
+}
+.organisation:hover {background-color:rgba(0,0,0,0.025);}
+.organisation__image {
+    float:left;
+    width:30%;
+    margin-right:10px;
+}
+.organisation__title {
+    margin-top:15px;
+}
+.organisation__description {}
