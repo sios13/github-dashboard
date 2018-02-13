@@ -1,8 +1,12 @@
 body {background-color:rgba(0,0,0,0.05);}
 
 .sidebar {
+    position:absolute;
+    top:0px;
+    left:0px;
+    height:100%;
     padding:0;
-    background-color:rgb(173, 196, 230);
+    background-color:rgb(70,130,180);
 }
 .sidebar__title {
     text-align:center;
@@ -24,14 +28,15 @@ body {background-color:rgba(0,0,0,0.05);}
 .sidebar__item {
     float:left;
     width:100%;
-    padding:10px 10px;
-    border-bottom:1px solid rgba(0,0,0,0.1);
-    color:white;
+    padding:10px 20px;
+    /* border-bottom:1px solid rgba(0,0,0,0.15); */
+    /* box-shadow:0px 0px 0px 1px rgba(0,0,0,0.15) inset; */
+    color:rgba(255,255,255,0.75);
 }
-.sidebar__item:hover {
+.sidebar__item:hover, .sidebar__item--active {
     text-decoration:none;
-    color:white;
-    background-color:rgba(0,0,0,0.025);
+    color:rgba(255,255,255,1);
+    background-color:rgba(255,255,255,0.05);
 }
 
 .cbox {
