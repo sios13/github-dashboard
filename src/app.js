@@ -2,8 +2,7 @@ import React from 'react';
 import {
     BrowserRouter as Router,
     Route,
-    NavLink,
-    Nav
+    NavLink
 } from 'react-router-dom';
 import queryString from 'query-string';
 
@@ -56,15 +55,15 @@ export class GithubDashboardApp extends React.Component {
                     <div className="row">
                         <div className="sidebar col-md-2">
                             <Sidebar user={this.state.user} />
-                            <NavLink className="sidebar__item sidebar__item--title" to="/">Dashboard</NavLink>
+                            <NavLink className="sidebar__item" activeClassName="sidebar__item--active" to="/" exact={true}>Dashboard</NavLink>
                             <NavLink className="sidebar__item" activeClassName="sidebar__item--active" to="/organisations">Organisations</NavLink>
-                            <NavLink className="sidebar__item" to="/notifications">Notifications</NavLink>
-                            <NavLink className="sidebar__item" to="/login">Login</NavLink>
-                            <NavLink className="sidebar__item" to="/logout">Logout</NavLink>
+                            <NavLink className="sidebar__item" activeClassName="sidebar__item--active" to="/notifications">Notifications</NavLink>
+                            <NavLink className="sidebar__item" activeClassName="sidebar__item--active" to="/login">Login</NavLink>
+                            <NavLink className="sidebar__item" activeClassName="sidebar__item--active" to="/logout">Logout</NavLink>
                         </div>
                         <div className="col-md-10 offset-md-2">
                             <Route exact path="/" component={Home}/>
-                            <Route path="/organisations" component={Organisations}/>
+                            <Route path="/organisations" render={props => <Organisations username={this.state.user.name} {...props}/>}/>
                             <Route path="/notifications" component={Notifications}/>
                             <Route path="/login" render={(props) => <Login login={this.login.bind(this)} {...props}/>}/>
                             <Route path="/logout" render={(props) => <Logout logout={this.logout.bind(this)} {...props}/>}/>
@@ -84,7 +83,9 @@ class Login extends React.Component {
         this.state = {
             login: "ingenting..."
         }
-        console.log(this.props);
+    }
+
+    componentDidMount() {
         let githubCode = queryString.parse(this.props.location.search).code;
         if (githubCode) {
             fetch('https://cnpqmk9lhh.execute-api.eu-central-1.amazonaws.com/prod/login', {
@@ -110,14 +111,6 @@ class Login extends React.Component {
                 console.log(JSON.parse(localStorage.getItem('user')).name);
             });
         }
-        else {
-            console.log("nej");
-        }
-    }
-
-    componentDidMount() {
-        // fetch('https://github.com/login/oauth/authorize?client_id=460281c3aceac1aed9cd')
-        // .then((response) => console.log(response));
     }
 
     render() {
