@@ -7,27 +7,67 @@ import {
 import queryString from 'query-string';
 
 import Sidebar from './sidebar';
-import Home from './content/home';
+import Dashboard from './content/dashboard';
 import Organisations from './content/organisations';
 import Notifications from './content/notifications';
 
 export class GithubDashboardApp extends React.Component {
     constructor(props) {
         super(props);
-        let user = JSON.parse(localStorage.getItem('user'));
-        if (user === null) {
-            this.state = {
-                user: {
-                    name: 'Not logged in',
-                    img_url: '/logout_image.png'
+
+        let user = localStorage.getItem('user');
+        this.state = {
+            user: user,
+            organizations: [],
+            activeOrg: null,
+            repos: []
+        };
+        this.baseUrl = "https://cnpqmk9lhh.execute-api.eu-central-1.amazonaws.com/prod";
+    }
+
+    async componentDidMount() {
+        this.setState({organizations: await this.getOrganizations()});
+    }
+
+    getOrganizations() {
+        let access_token = localStorage.getItem('access_token');
+        let options = {
+            method: 'post',
+            body: JSON.stringify({access_token: access_token})
+        };
+
+        return fetch(this.baseUrl + '/organisations', options)
+        .then((response) => { return response.json(); })
+        .then((response) => {
+            return response.message.map(organization => organization.organization.login);
+        });
+    }
+
+    async onOrgChange(orgChoice) {
+        await this.setState({activeOrg: orgChoice.value});
+        await this.setState({repos: await this.getOrgRepos()});
+        console.log(this.state.repos);
+    }
+
+    getOrgRepos() {
+        let access_token = localStorage.getItem('access_token');
+        let options = {
+            method: 'GET'
+            // body: JSON.stringify({access_token: access_token})
+        };
+
+        // return fetch(this.baseUrl + '/repos')
+        return fetch('http://api.github.com/orgs/' + this.state.activeOrg + '/repos?access_token=' + access_token, options)
+        .then(response => response.json())
+        .then(response => {
+            return response.map(repo => {
+                console.log(repo);
+                return {
+                    name: repo.name,
+                    description: repo.description
                 }
-            }
-        }
-        else {
-            this.state = {
-                user: user
-            }
-        }
+            });
+        });
     }
 
     login(user) {
@@ -40,12 +80,8 @@ export class GithubDashboardApp extends React.Component {
     logout() {
         localStorage.removeItem('access_token');
         localStorage.removeItem('user');
-        this.setState({
-            user: {
-                name: 'Not logged in',
-                img_url: '/logout_image.png'
-            }
-        });
+        localStorage.removeItem('organizations');
+        this.setState({user: null, organisations: null});
     }
 
     render() {
@@ -54,7 +90,7 @@ export class GithubDashboardApp extends React.Component {
                 <div className="container-fluid">
                     <div className="row">
                         <div className="sidebar col-md-2">
-                            <Sidebar user={this.state.user} />
+                            <Sidebar user={this.state.user} organizations={this.state.organizations} onOrgChange={this.onOrgChange.bind(this)}/>
                             <NavLink className="sidebar__item" activeClassName="sidebar__item--active" to="/" exact={true}>Dashboard</NavLink>
                             <NavLink className="sidebar__item" activeClassName="sidebar__item--active" to="/organisations">Organisations</NavLink>
                             <NavLink className="sidebar__item" activeClassName="sidebar__item--active" to="/notifications">Notifications</NavLink>
@@ -62,7 +98,7 @@ export class GithubDashboardApp extends React.Component {
                             <NavLink className="sidebar__item" activeClassName="sidebar__item--active" to="/logout">Logout</NavLink>
                         </div>
                         <div className="col-md-10 offset-md-2">
-                            <Route exact path="/" component={Home}/>
+                            <Route exact path="/" render={props => <Dashboard orgName={this.state.activeOrg} repos={this.state.repos} {...props}/>}/>
                             <Route path="/organisations" render={props => <Organisations username={this.state.user.name} {...props}/>}/>
                             <Route path="/notifications" component={Notifications}/>
                             <Route path="/login" render={(props) => <Login login={this.login.bind(this)} {...props}/>}/>
