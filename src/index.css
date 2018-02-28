@@ -1,7 +1,7 @@
 body {background-color:rgba(0,0,0,0.05);}
 
 .sidebar {
-    position:absolute;
+    position:fixed;
     top:0px;
     left:0px;
     height:100%;
@@ -29,8 +29,6 @@ body {background-color:rgba(0,0,0,0.05);}
     float:left;
     width:100%;
     padding:10px 20px;
-    /* border-bottom:1px solid rgba(0,0,0,0.15); */
-    /* box-shadow:0px 0px 0px 1px rgba(0,0,0,0.15) inset; */
     color:rgba(255,255,255,0.75);
 }
 .sidebar__item:hover, .sidebar__item--active {
@@ -38,18 +36,27 @@ body {background-color:rgba(0,0,0,0.05);}
     color:rgba(255,255,255,1);
     background-color:rgba(255,255,255,0.05);
 }
+.sidebar__dropdown {margin:5px;}
 
 .cbox {
     background-color:white;
+    /* box-shadow:inset 0px 0px 0px 5px rgba(0,0,0,0.05); */
+    /* padding:15px; */
     margin-top:15px;
-    margin-right:5px;
-    margin-left:5px;
-    padding:10px;
+    padding:15px;
 }
 .cbox__title {
     width:100%;
     font-size:26px;
 }
+
+.repo {
+    padding:5px 0px;
+}
+.repo__name {
+    font-size:16px;
+}
+.repo__desc {}
 
 .organisation {
     float:left;

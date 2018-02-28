@@ -6,9 +6,9 @@ export class Sidebar extends React.Component {
     render() {
         return(
             <div>
-                <div className="sidebar__title">Github Dashboard</div>
+                <div className='sidebar__title'>Github Dashboard</div>
                 <User user={this.props.user} />
-                <OrganizationsDropDown organizations={this.props.organizations} onOrgChange={this.props.onOrgChange}/>
+                <OrganizationsDropDown organizations={this.props.organizations} onOrgChange={this.props.onOrgChange} activeOrg={this.props.activeOrg} />
             </div>
         );
     }
@@ -16,18 +16,18 @@ export class Sidebar extends React.Component {
 
 function User(props) {
     function getUserName() {
-        if (props.user) return props.user.name;
+        if (props.user.name) return props.user.name;
         else return '';
     }
 
     function getImgUrl() {
-        if (props.user) return props.user.img_url;
+        if (props.user.img_url) return props.user.img_url;
         else return '/logout_image.png';
     }
 
     return (
-        <div className="sidebar__user">
-            <img src={getImgUrl()} alt={getUserName()} className="sidebar__image" />
+        <div className='sidebar__user'>
+            <img src={getImgUrl()} alt={getUserName()} className='sidebar__image' />
             <span>{getUserName()}</span>
         </div>
     );
@@ -41,7 +41,13 @@ function OrganizationsDropDown(props) {
     }
 
     return (
-        <Dropdown options={getPreparedOrgs()} onChange={props.onOrgChange} value={getPreparedOrgs()[0]} placeholder="Select an option" />
+        <Dropdown
+            className='sidebar__dropdown'
+            options={getPreparedOrgs()}
+            onChange={props.onOrgChange}
+            value={props.activeOrg}
+            placeholder='- Select org -'
+        />
     );
 }
 
