@@ -43,7 +43,8 @@ export class Dashboard extends React.Component {
             <div className='row'>
                 <div className='col-md-6 col-sm-12'>
                     <div className='cbox'>
-                        <h1 className='cbox__title'>{this.state.activeOrg}Test</h1>
+                        <h1 className='cbox__title'>{this.props.activeOrg}</h1>
+                        <button onClick={this.props.addSubscription}>Subscribe to all actions in {this.props.activeOrg}</button>
                     </div>
                 </div>
                 <div className='col-md-6 col-sm-12'>

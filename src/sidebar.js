@@ -8,7 +8,11 @@ export class Sidebar extends React.Component {
             <div>
                 <div className='sidebar__title'>Github Dashboard</div>
                 <User user={this.props.user} />
-                <OrganizationsDropDown organizations={this.props.organizations} onOrgChange={this.props.onOrgChange} activeOrg={this.props.activeOrg} />
+                <OrganizationsDropDown
+                    organizations={this.props.organizations}
+                    onOrgChange={this.props.onOrgChange}
+                    activeOrg={this.props.activeOrg}
+                />
             </div>
         );
     }
@@ -34,8 +38,8 @@ function User(props) {
 }
 
 function OrganizationsDropDown(props) {
-    function getPreparedOrgs() {
-        return props.organizations.map(org => {
+    function makeOrgs(orgs) {
+        return orgs.map(org => {
             return { value: org, label: org }
         });
     }
@@ -43,7 +47,7 @@ function OrganizationsDropDown(props) {
     return (
         <Dropdown
             className='sidebar__dropdown'
-            options={getPreparedOrgs()}
+            options={makeOrgs(props.organizations)}
             onChange={props.onOrgChange}
             value={props.activeOrg}
             placeholder='- Select org -'

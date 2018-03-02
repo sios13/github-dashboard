@@ -13,7 +13,7 @@ export class Organisations extends React.Component {
         this.getOrganisations();
     }
 
-    // access_token 089bf2bf9968431a5e4149c41feba90ca5ee70ec
+    // access_token 234d0560ec9b996f4286e7eab6f76a3e0c067c6a
     getOrganisations() {
         let access_token = localStorage.getItem('access_token');
         let options = {

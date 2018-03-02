@@ -17,13 +17,33 @@ export class GithubDashboardApp extends React.Component {
         this.state = {
             user: {},
             organizations: [],
-            activeOrg: null
+            activeOrg: null,
+            flashMsg: ''
         };
         this.baseUrl = 'https://cnpqmk9lhh.execute-api.eu-central-1.amazonaws.com/prod';
     }
 
     componentDidMount() {
         this.login();
+    }
+
+    addSubscription() {
+        let user_name = this.state.user.name;
+        let org_name = this.state.activeOrg;
+        let access_token = localStorage.getItem('access_token');
+        let options = {
+            method: 'post',
+            body: JSON.stringify({ user_name, org_name, access_token })
+        };
+
+        fetch(this.baseUrl + '/subscribe', options)
+        .then(response => response.json())
+        .then(response => {
+            if (response.statusCode === 422) this.setState({flashMsg: 'You are already subscribed.'});
+            if (response.statusCode === 404) this.setState({flashMsg: 'Unable to add subscription.'});
+            if (response.statusCode === 201) this.setState({flashMsg: 'You are now subscribed to ' + this.state.activeOrg + '.'});
+            console.log(response)
+        });
     }
 
     onOrgChange(orgChoice) {
@@ -82,7 +102,8 @@ export class GithubDashboardApp extends React.Component {
                             <NavLink className='sidebar__item' activeClassName='sidebar__item--active' to='/logout'>Logout</NavLink>
                         </div>
                         <div className='col-md-10 offset-md-2'>
-                            <Route exact path='/' render={props => <Dashboard activeOrg={this.state.activeOrg} {...props}/>}/>
+                            <div className='alert'><p>{this.state.flashMsg}</p></div>
+                            <Route exact path='/' render={props => <Dashboard activeOrg={this.state.activeOrg} addSubscription={this.addSubscription.bind(this)} {...props}/>}/>
                             <Route path='/organisations' render={props => <Organisations username={this.state.user.name} {...props}/>}/>
                             <Route path='/notifications' component={Notifications}/>
                             <Route path='/login' render={(props) => <Login login={this.login.bind(this)} {...props}/>}/>
@@ -102,11 +123,11 @@ class Login extends React.Component {
         let githubCode = queryString.parse(this.props.location.search).code;
         let access_token = localStorage.getItem('access_token');
         if (githubCode && !access_token) {
-            this.getAccessToken(githubCode, access_token);
+            this.getAccessToken(githubCode);
         }
     }
 
-    getAccessToken(githubCode, access_token) {
+    getAccessToken(githubCode) {
         fetch('https://cnpqmk9lhh.execute-api.eu-central-1.amazonaws.com/prod/login', {
             method: 'post',
             body: JSON.stringify({
@@ -125,7 +146,7 @@ class Login extends React.Component {
         return(
             <div className='cbox row'>
                 <h1 className='cbox__title'>Login</h1>
-                <a href='https://github.com/login/oauth/authorize?client_id=460281c3aceac1aed9cd&amp;allow_signup=false&amp;scope=repo,user'>Login</a>
+                <a href='https://github.com/login/oauth/authorize?client_id=460281c3aceac1aed9cd&amp;allow_signup=false&amp;scope=repo,user,admin:org_hook'>Login</a>
             </div>
         );
     }
