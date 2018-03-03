@@ -5,6 +5,7 @@ import {
     NavLink
 } from 'react-router-dom';
 import queryString from 'query-string';
+import io from 'socket.io-client';
 
 import Sidebar from './sidebar';
 import Dashboard from './content/dashboard';
@@ -25,6 +26,10 @@ export class GithubDashboardApp extends React.Component {
 
     componentDidMount() {
         this.login();
+        const socket = io('http://localhost:3001');
+        socket.on('webhook', function(test) {
+            console.log(test);
+        });
     }
 
     addSubscription() {
