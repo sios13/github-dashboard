@@ -1,6 +1,6 @@
 import React from 'react';
 
-export class Notifications extends React.Component {
+export class Repositories extends React.Component {
     render() {
         return(
             <div className="cbox row">
@@ -10,4 +10,4 @@ export class Notifications extends React.Component {
     }
 }
 
-export default Notifications;
+export default Repositories;

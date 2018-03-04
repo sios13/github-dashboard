@@ -20,12 +20,12 @@ export class Sidebar extends React.Component {
 
 function User(props) {
     function getUserName() {
-        if (props.user.name) return props.user.name;
+        if (props.user) return props.user.name;
         else return '';
     }
 
     function getImgUrl() {
-        if (props.user.img_url) return props.user.img_url;
+        if (props.user) return props.user.img_url;
         else return '/logout_image.png';
     }
 
@@ -39,6 +39,7 @@ function User(props) {
 
 function OrganizationsDropDown(props) {
     function makeOrgs(orgs) {
+        if (orgs === null) return [];
         return orgs.map(org => {
             return { value: org, label: org }
         });
