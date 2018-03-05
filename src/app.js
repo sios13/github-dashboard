@@ -23,9 +23,12 @@ export class GithubDashboardApp extends React.Component {
         };
         this.baseUrl = 'https://cnpqmk9lhh.execute-api.eu-central-1.amazonaws.com/prod';
         
-        this.socket = io('localhost:3001');
-        this.socket.on('webhook', function(test) {
-            console.log(test);
+        this.io = io('localhost:3001');
+        this.io.on('message', function(data) {
+            console.log('Message from socket server: ' + data);
+        });
+        this.io.on('connect', function() {
+            console.log('Connected to socket server.');
         });
     }
 
@@ -50,22 +53,38 @@ export class GithubDashboardApp extends React.Component {
         .then(subscription => subscription.subscription)
     }
 
-    addSubscription([isReleases, isCommits]) {
+    addSubscription([isFork, isMember, isMembership, isOrganization, isPublic, isPush, isRepository, isReleases, isTeam]) {
         let user_name = this.state.user.name;
         let org_name = this.state.activeOrg;
-        let access_token = localStorage.getItem('access_token');
+
         let options = {
             method: 'post',
-            body: JSON.stringify({ access_token, user_name, org_name, isReleases, isCommits })
+            body: JSON.stringify({ user_name, org_name, isFork, isMember, isMembership, isOrganization, isPublic, isPush, isRepository, isReleases, isTeam })
         };
-
-        fetch(this.baseUrl + '/subscriptions', options)
+        return fetch(this.baseUrl + '/subscriptions', options)
         .then(response => response.json())
         .then(response => {
             // if (response.statusCode === 422) this.setState({flashMsg: 'You are already subscribed to ' + this.state.activeOrg + '.'});
             // if (response.statusCode === 404) this.setState({flashMsg: 'Unable to add subscription.'});
             // if (response.statusCode === 201) this.setState({flashMsg: 'You are now subscribed to ' + this.state.activeOrg + '.'});
-            console.log(response)
+            return response;
+        });
+    }
+
+    addWebhook() {
+        let access_token = localStorage.getItem('access_token');
+        let user_name = this.state.user.name;
+        let org_name = this.state.activeOrg;
+
+        let options = {
+            method: 'post',
+            body: JSON.stringify({ access_token, user_name, org_name })
+        };
+        return fetch(this.baseUrl + '/addwebhook', options)
+        .then(response => response.json())
+        .then(response => {
+            if (response.statusCode === 404) throw Error(404);
+            return response;
         });
     }
 
@@ -104,7 +123,10 @@ export class GithubDashboardApp extends React.Component {
     }
 
     login() {
-        Promise.all([this.makeUser(), this.makeOrganizations()]);
+        Promise.all([this.makeUser(), this.makeOrganizations()])
+        .then(result => {
+            this.io.emit('room', this.state.user.name);
+        })
     }
 
     logout() {
@@ -133,6 +155,7 @@ export class GithubDashboardApp extends React.Component {
                                 user={this.state.user}
                                 activeOrg={this.state.activeOrg}
                                 addSubscription={this.addSubscription.bind(this)}
+                                addWebhook={this.addWebhook.bind(this)}
                                 getSubscription={this.getSubscription.bind(this)}
                                 {...props}
                             />}/>
