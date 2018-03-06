@@ -36,10 +36,58 @@ export class GithubDashboardApp extends React.Component {
         this.login();
     }
 
-    addNotificationSettings() {}
+    // getEmailNotificationSettings() {
+    //     return fetch(this.baseUrl + '/notificationsettings/email/' + this.state.user.username + '/' + this.state.activeOrg)
+    //     .then(response => response.json())
+    //     .then(response => console.log(response));
+    // }
+
+    getUser(username) {
+        return fetch(this.baseUrl + '/users/' + username)
+        .then(response => response.json())
+        .then(response => response.user);
+    }
+
+    createUser(settings) {
+        console.log(settings);
+        let options = {
+            method: 'post',
+            body: JSON.stringify(settings)
+        }
+        return fetch(this.baseUrl + '/users', options)
+        .then(response => response.json())
+        .then(response => response.user);
+    }
+
+    updateUser(settings) {
+        let options = {
+            method: 'post',
+            body: JSON.stringify(settings)
+        }
+        console.log('hej!' + settings)
+        return fetch(this.baseUrl + '/users/' + this.state.user.username, options)
+        .then(response => response.json())
+        .then(response => console.log(response));
+    }
+
+    updateNotificationSetting(settings) {
+        let options = {
+            method: 'post',
+            body: JSON.stringify(settings)
+        }
+        return fetch(this.baseUrl + '/notifications/' + this.state.user.username + '/' + this.state.activeOrg, options)
+        .then(response => response.json())
+        .then(response => console.log('Notification settings updated.'));
+    }
+
+    getNotificationSettings() {
+        return fetch(this.baseUrl + '/notifications/' + this.state.user.username + '/' + this.state.activeOrg)
+        .then(response => response.json())
+        .then(response => response.data.Item);
+    }
 
     getSubscription() {
-        let user_name = this.state.user.name;
+        let user_name = this.state.user.username;
         let org_name = this.state.activeOrg;
         let options = {
             method: 'get',
@@ -54,7 +102,7 @@ export class GithubDashboardApp extends React.Component {
     }
 
     addSubscription([isFork, isMember, isMembership, isOrganization, isPublic, isPush, isRepository, isReleases, isTeam]) {
-        let user_name = this.state.user.name;
+        let user_name = this.state.user.username;
         let org_name = this.state.activeOrg;
 
         let options = {
@@ -73,7 +121,7 @@ export class GithubDashboardApp extends React.Component {
 
     addWebhook() {
         let access_token = localStorage.getItem('access_token');
-        let user_name = this.state.user.name;
+        let user_name = this.state.user.username;
         let org_name = this.state.activeOrg;
 
         let options = {
@@ -109,15 +157,18 @@ export class GithubDashboardApp extends React.Component {
 
     makeUser() {
         // return fetch(this.baseUrl + '/user')
+        // TODO hämta in user från github om hen redan finns i databasen
         let access_token = localStorage.getItem('access_token');
         return fetch('https://api.github.com/user?access_token=' + access_token)
         .then(response => {
             if (response.ok === false) throw Error();
             return response.json();
         })
-        .then(response => {
-            let user = {name: response.login, img_url: response.avatar_url};
-            this.setState({user: user});
+        .then(async response => {
+            let user = await this.getUser(response.login);
+            if (user == null)
+                user = await this.createUser({username: response.login, img_url: response.avatar_url, email: response.email});
+            await this.setState({user: user});
         })
         .catch(error => this.setState({user: {}}));
     }
@@ -125,7 +176,7 @@ export class GithubDashboardApp extends React.Component {
     login() {
         Promise.all([this.makeUser(), this.makeOrganizations()])
         .then(result => {
-            this.io.emit('room', this.state.user.name);
+            this.io.emit('room', this.state.user.username);
         })
     }
 
@@ -157,6 +208,9 @@ export class GithubDashboardApp extends React.Component {
                                 addSubscription={this.addSubscription.bind(this)}
                                 addWebhook={this.addWebhook.bind(this)}
                                 getSubscription={this.getSubscription.bind(this)}
+                                getNotificationSettings={this.getNotificationSettings.bind(this)}
+                                updateNotificationSetting={this.updateNotificationSetting.bind(this)}
+                                updateUser={this.updateUser.bind(this)}
                                 {...props}
                             />}/>
                             <Route path='/respositories' component={Repositories}/>

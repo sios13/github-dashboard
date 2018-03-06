@@ -20,7 +20,7 @@ export class Sidebar extends React.Component {
 
 function User(props) {
     function getUserName() {
-        if (props.user) return props.user.name;
+        if (props.user) return props.user.username;
         else return '';
     }
 
