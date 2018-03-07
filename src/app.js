@@ -36,12 +36,7 @@ export class GithubDashboardApp extends React.Component {
         this.login();
     }
 
-    // getEmailNotificationSettings() {
-    //     return fetch(this.baseUrl + '/notificationsettings/email/' + this.state.user.username + '/' + this.state.activeOrg)
-    //     .then(response => response.json())
-    //     .then(response => console.log(response));
-    // }
-
+    /* USER CRUD */
     getUser(username) {
         return fetch(this.baseUrl + '/users/' + username)
         .then(response => response.json())
@@ -64,12 +59,12 @@ export class GithubDashboardApp extends React.Component {
             method: 'post',
             body: JSON.stringify(settings)
         }
-        console.log('hej!' + settings)
         return fetch(this.baseUrl + '/users/' + this.state.user.username, options)
         .then(response => response.json())
         .then(response => console.log(response));
     }
 
+    /* NOTIFICATION CRUD */
     updateNotificationSetting(settings) {
         let options = {
             method: 'post',
@@ -86,38 +81,40 @@ export class GithubDashboardApp extends React.Component {
         .then(response => response.data.Item);
     }
 
+    /* SUBSCRIPTION CRUD */
     getSubscription() {
-        let user_name = this.state.user.username;
-        let org_name = this.state.activeOrg;
-        let options = {
-            method: 'get',
-            headers: {
-                user_name: user_name,
-                org_name: org_name
-            }
-        }
-        return fetch(this.baseUrl + '/subscriptions', options)
-        .then(response => response.json())
-        .then(subscription => subscription.subscription)
-    }
-
-    addSubscription([isFork, isMember, isMembership, isOrganization, isPublic, isPush, isRepository, isReleases, isTeam]) {
-        let user_name = this.state.user.username;
-        let org_name = this.state.activeOrg;
-
-        let options = {
-            method: 'post',
-            body: JSON.stringify({ user_name, org_name, isFork, isMember, isMembership, isOrganization, isPublic, isPush, isRepository, isReleases, isTeam })
-        };
-        return fetch(this.baseUrl + '/subscriptions', options)
+        return fetch(this.baseUrl + '/subscriptions/' + this.state.user.username + '/' + this.state.activeOrg)
         .then(response => response.json())
         .then(response => {
-            // if (response.statusCode === 422) this.setState({flashMsg: 'You are already subscribed to ' + this.state.activeOrg + '.'});
-            // if (response.statusCode === 404) this.setState({flashMsg: 'Unable to add subscription.'});
-            // if (response.statusCode === 201) this.setState({flashMsg: 'You are now subscribed to ' + this.state.activeOrg + '.'});
-            return response;
-        });
+            console.log(response)
+            return response.subscription
+        })
     }
+
+    updateSubscription(settings) {        
+        let options = {method: 'post', body: JSON.stringify(settings)};
+        return fetch(this.baseUrl + '/subscriptions/' + this.state.user.username + '/' + this.state.activeOrg, options)
+        .then(response => response.json())
+        .then(response => {console.log(response)});
+    }
+
+    // addSubscription([isFork, isMember, isMembership, isOrganization, isPublic, isPush, isRepository, isReleases, isTeam]) {
+    //     let user_name = this.state.user.username;
+    //     let org_name = this.state.activeOrg;
+
+    //     let options = {
+    //         method: 'post',
+    //         body: JSON.stringify({ user_name, org_name, isFork, isMember, isMembership, isOrganization, isPublic, isPush, isRepository, isReleases, isTeam })
+    //     };
+    //     return fetch(this.baseUrl + '/subscriptions', options)
+    //     .then(response => response.json())
+    //     .then(response => {
+    //         // if (response.statusCode === 422) this.setState({flashMsg: 'You are already subscribed to ' + this.state.activeOrg + '.'});
+    //         // if (response.statusCode === 404) this.setState({flashMsg: 'Unable to add subscription.'});
+    //         // if (response.statusCode === 201) this.setState({flashMsg: 'You are now subscribed to ' + this.state.activeOrg + '.'});
+    //         return response;
+    //     });
+    // }
 
     addWebhook() {
         let access_token = localStorage.getItem('access_token');
@@ -201,16 +198,17 @@ export class GithubDashboardApp extends React.Component {
                         </div>
                         <div className='col-md-10 offset-md-2'>
                             <div className='alert'><p>{this.state.flashMsg}</p></div>
-                            <Route exact path='/' render={props => <Dashboard activeOrg={this.state.activeOrg} addSubscription={this.addSubscriptionSettings.bind(this)} {...props}/>}/>
+                            <Route exact path='/' render={props => <Dashboard activeOrg={this.state.activeOrg} {...props}/>}/>
                             <Route path='/settings' render={props => <Settings
                                 user={this.state.user}
                                 activeOrg={this.state.activeOrg}
-                                addSubscription={this.addSubscription.bind(this)}
+                                // addSubscription={this.addSubscription.bind(this)}
                                 addWebhook={this.addWebhook.bind(this)}
                                 getSubscription={this.getSubscription.bind(this)}
                                 getNotificationSettings={this.getNotificationSettings.bind(this)}
                                 updateNotificationSetting={this.updateNotificationSetting.bind(this)}
                                 updateUser={this.updateUser.bind(this)}
+                                updateSubscription={this.updateSubscription.bind(this)}
                                 {...props}
                             />}/>
                             <Route path='/respositories' component={Repositories}/>

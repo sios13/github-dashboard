@@ -34,63 +34,52 @@ export class Settings extends React.Component {
 
             let subscription = await this.props.getSubscription() || {};
             await this.setState({
-                isFork: subscription.isFork,
-                isMember: subscription.isMember,
-                isMembership: subscription.isMembership,
-                isOrganization: subscription.isOrganization,
-                isPublic: subscription.isPublic,
-                isPush: subscription.isPush,
-                isRepository: subscription.isRepository,
-                isReleases: subscription.isReleases,
-                isTeam: subscription.isTeam
+                isFork: subscription.isFork || false,
+                isMember: subscription.isMember || false,
+                isMembership: subscription.isMembership || false,
+                isOrganization: subscription.isOrganization || false,
+                isPublic: subscription.isPublic || false,
+                isPush: subscription.isPush || false,
+                isRepository: subscription.isRepository || false,
+                isReleases: subscription.isReleases || false,
+                isTeam: subscription.isTeam || false
             });
 
             let notificationSettings = await this.props.getNotificationSettings() || {};
-            await this.setState({isEmail: notificationSettings.isEmail});
+            await this.setState({isEmail: notificationSettings.isEmail || false});
 
             await this.setState({email: this.props.user.email});
 
             await this.setState({isLoading: false});
-
-            // let isFork = subscription.isFork ? true : false;
-            // let isMember = subscription.isMember ? true : false;
-            // let isMembership = subscription.isMembership ? true : false;
-            // let isOrganization = subscription.isOrganization ? true : false;
-            // let isPublic = subscription.isPublic ? true : false;
-            // let isPush = subscription.isPush ? true : false;
-            // let isRepository = subscription.isRepository ? true : false;
-            // let isReleases = subscription.isReleases ? true : false;
-            // let isTeam = subscription.isTeam ? true : false;
-            // await this.setState({isFork, isMember, isMembership, isOrganization, isPublic, isPush, isRepository, isReleases, isTeam});
         }
     }
 
     // access_token 234d0560ec9b996f4286e7eab6f76a3e0c067c6a
     async handleCheckboxChange(event) {
-        const target = event.target;
+        const isChecked = event.target.checked;
+        const name = event.target.name;
 
-        const isChecked = target.checked;
-        const name = target.name;
-        await this.setState({[name]: isChecked})
+        let addWebhookPromise = this.props.addWebhook;
+        let updateSubscriptionPromise = this.props.updateSubscription;
 
-        let addSubscriptionPromise = this.props.addSubscription([
-            this.state.isFork,
-            this.state.isMember,
-            this.state.isMembership,
-            this.state.isOrganization,
-            this.state.isPublic,
-            this.state.isPush,
-            this.state.isRepository,
-            this.state.isReleases,
-            this.state.isTeam
-        ]);
-        let addWebhookPromise = this.props.addWebhook();
-        Promise.all([addSubscriptionPromise, addWebhookPromise])
-        .then(result => console.log('subscription and webhook added/updated.'))
-        .catch(error => {
-            if (error.message === '404') return console.log('Unable to subscribe to this organization.');
-            console.log('error when adding subscription and webook.')
-        })
+        try {
+            await addWebhookPromise();
+            await updateSubscriptionPromise({[name]: isChecked});
+            await this.setState({[name]: isChecked});
+            console.log('Subscription and webhook successfully added/updated.');
+        }
+        catch(error) {
+            console.log('Unable to subscribe to this organization.');
+        }
+    }
+
+    async handleEmailChange() {
+        let updateNotificationPromise = this.props.updateNotificationSetting;
+        let updateUserPromise = this.props.updateUser;
+
+        await updateNotificationPromise({isEmail: this.state.isEmail});
+        await updateUserPromise({email: this.state.email})
+        await this.setState({isEmail: this.state.isEmail ? false : true});
     }
 
     getSubscriptionSettings() {
@@ -143,15 +132,6 @@ export class Settings extends React.Component {
                 Team
             </label>
         </form>
-    }
-
-    async handleEmailChange() {
-        // 1. sätt email till true i notification settings
-        await this.setState({isEmail: this.state.isEmail ? false : true});
-        await this.props.updateNotificationSetting({isEmail: this.state.isEmail});
-        // 2. uppdatera email för user
-        this.props.updateUser({email: this.state.email})
-        console.log(this.state.email);
     }
 
     getNotificationSettings() {
