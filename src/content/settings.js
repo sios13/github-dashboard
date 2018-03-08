@@ -54,6 +54,7 @@ export class Settings extends React.Component {
 
     // access_token 234d0560ec9b996f4286e7eab6f76a3e0c067c6a
     async handleCheckboxChange(event) {
+        event.target.disabled = true;
         const isChecked = event.target.checked;
         const name = event.target.name;
 
@@ -65,6 +66,8 @@ export class Settings extends React.Component {
             await updateSubscriptionPromise({[name]: isChecked});
             await this.setState({[name]: isChecked});
             console.log('Subscription and webhook successfully added/updated.');
+            this.props.addFlashMessage('hello');
+            event.target.disabled = false;
         }
         catch(error) {
             console.log('Unable to subscribe to this organization.');
@@ -86,7 +89,7 @@ export class Settings extends React.Component {
         return <form>
             <p>Choose the events you would like to subscribe to.</p>
             <label>
-                <input name='isFork' type='checkbox' checked={this.state.isFork} onChange={this.handleCheckboxChange} className='checkbox' />
+                <input disabled={false} name='isFork' type='checkbox' checked={this.state.isFork} onChange={this.handleCheckboxChange} className='checkbox' />
                 <span className="checkbox__text">Fork</span>
                 <span className="cbox__subtext">Any time a Repository is forked.</span>
             </label>

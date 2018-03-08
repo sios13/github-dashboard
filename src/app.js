@@ -36,6 +36,12 @@ export class GithubDashboardApp extends React.Component {
         this.login();
     }
 
+    addFlashMessage(text) {
+        this.setState({
+            flashMsgs: [...this.state.flashMsgs, <div className="flashMsg cbox">{text}</div>]
+        });
+    }
+
     /* USER CRUD */
     getUser(username) {
         return fetch(this.baseUrl + '/users/' + username)
@@ -213,6 +219,7 @@ export class GithubDashboardApp extends React.Component {
                                 updateNotificationSetting={this.updateNotificationSetting.bind(this)}
                                 updateUser={this.updateUser.bind(this)}
                                 updateSubscription={this.updateSubscription.bind(this)}
+                                addFlashMessage={this.addFlashMessage.bind(this)}
                                 {...props}
                             />}/>
                             <Route path='/respositories' component={Repositories}/>
