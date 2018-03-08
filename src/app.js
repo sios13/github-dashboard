@@ -19,7 +19,7 @@ export class GithubDashboardApp extends React.Component {
             user: null,
             organizations: null,
             activeOrg: null,
-            flashMsg: null
+            flashMsgs: []
         };
         this.baseUrl = 'https://cnpqmk9lhh.execute-api.eu-central-1.amazonaws.com/prod';
         
@@ -173,7 +173,9 @@ export class GithubDashboardApp extends React.Component {
     login() {
         Promise.all([this.makeUser(), this.makeOrganizations()])
         .then(result => {
-            this.io.emit('room', this.state.user.username);
+            if (localStorage.getItem('access_token')) {
+                this.io.emit('room', this.state.user.username);
+            }
         })
     }
 
@@ -197,7 +199,9 @@ export class GithubDashboardApp extends React.Component {
                             <NavLink className='sidebar__item' activeClassName='sidebar__item--active' to='/logout'>Logout</NavLink>
                         </div>
                         <div className='col-md-10 offset-md-2'>
-                            <div className='alert'><p>{this.state.flashMsg}</p></div>
+                            <div className='flash'>{this.state.flashMsgs}</div>
+                        </div>
+                        <div className='col-md-10 offset-md-2'>
                             <Route exact path='/' render={props => <Dashboard activeOrg={this.state.activeOrg} {...props}/>}/>
                             <Route path='/settings' render={props => <Settings
                                 user={this.state.user}

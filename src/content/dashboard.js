@@ -4,7 +4,7 @@ export class Dashboard extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            repos: []
+            flow: []
         }
     }
 
@@ -44,13 +44,12 @@ export class Dashboard extends React.Component {
                 <div className='col-md-6 col-sm-12'>
                     <div className='cbox'>
                         <h1 className='cbox__title'>{this.props.activeOrg}</h1>
-                        <button onClick={this.props.addSubscription}>Subscribe to all actions in {this.props.activeOrg}</button>
                     </div>
                 </div>
                 <div className='col-md-6 col-sm-12'>
                     <div className='cbox'>
-                        <h1 className='cbox__title'>Repos</h1>
-                        {this.state.repos}
+                        <h1 className='cbox__title'>Flow</h1>
+                        {this.state.flow}
                     </div>
                 </div>
             </div>

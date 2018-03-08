@@ -4,15 +4,15 @@ export class Settings extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            isFork: false, // Any time a Repository is forked.
-            isMember: false, // Any time a User is added or removed as a collaborator to a Repository, or has their permissions modified.
-            isMembership: false, // Any time a User is added or removed from a team. Organization hooks only.
-            isOrganization: false, // Any time a user is added, removed, or invited to an Organization. Organization hooks only.
-            isPublic: false, // Any time a Repository changes from private to public.
-            isPush: false, // Any Git push to a Repository, including editing tags or branches. Commits via API actions that update references are also counted.
-            isRepository: false, // Any time a Repository is created, deleted (organization hooks only), archived, unarchived, made public, or made private.
-            isReleases: false, // Any time a Release is published in a Repository.
-            isTeam: false, // Any time a team is created, deleted, modified, or added to or removed from a repository. Organization hooks only.
+            isFork: false,
+            isMember: false,
+            isMembership: false,
+            isOrganization: false,
+            isPublic: false,
+            isPush: false,
+            isRepository: false,
+            isReleases: false,
+            isTeam: false,
             isLoading: false,
             email: null
         }
@@ -47,9 +47,7 @@ export class Settings extends React.Component {
 
             let notificationSettings = await this.props.getNotificationSettings() || {};
             await this.setState({isEmail: notificationSettings.isEmail || false});
-
             await this.setState({email: this.props.user.email});
-
             await this.setState({isLoading: false});
         }
     }
@@ -73,11 +71,11 @@ export class Settings extends React.Component {
         }
     }
 
-    async handleEmailChange() {
+    async handleEmailChange(event) {
         let updateNotificationPromise = this.props.updateNotificationSetting;
         let updateUserPromise = this.props.updateUser;
 
-        await updateNotificationPromise({isEmail: this.state.isEmail});
+        await updateNotificationPromise({isEmail: event.target.checked});
         await updateUserPromise({email: this.state.email})
         await this.setState({isEmail: this.state.isEmail ? false : true});
     }
@@ -88,48 +86,57 @@ export class Settings extends React.Component {
         return <form>
             <p>Choose the events you would like to subscribe to.</p>
             <label>
-                <input name='isFork' type='checkbox' checked={this.state.isFork} onChange={this.handleCheckboxChange} />
-                Fork
+                <input name='isFork' type='checkbox' checked={this.state.isFork} onChange={this.handleCheckboxChange} className='checkbox' />
+                <span className="checkbox__text">Fork</span>
+                <span className="cbox__subtext">Any time a Repository is forked.</span>
             </label>
             <br />
             <label>
-                <input name='isMember' type='checkbox' checked={this.state.isMember} onChange={this.handleCheckboxChange} />
-                Member
+                <input name='isMember' type='checkbox' checked={this.state.isMember} onChange={this.handleCheckboxChange} className='checkbox' />
+                <span className="checkbox__text">Member</span>
+                <span className="cbox__subtext">Any time a User is added or removed as a collaborator to a Repository, or has their permissions modified.</span>
             </label>
             <br />
             <label>
-                <input name='isMembership' type='checkbox' checked={this.state.isMembership} onChange={this.handleCheckboxChange} />
-                Membership
+                <input name='isMembership' type='checkbox' checked={this.state.isMembership} onChange={this.handleCheckboxChange} className='checkbox' />
+                <span className="checkbox__text">Membership</span>
+                <span className="cbox__subtext">Any time a User is added or removed from a team. Organization hooks only.</span>
             </label>
             <br />
             <label>
-                <input name='isOrganization' type='checkbox' checked={this.state.isOrganization} onChange={this.handleCheckboxChange} />
-                Organization
+                <input name='isOrganization' type='checkbox' checked={this.state.isOrganization} onChange={this.handleCheckboxChange} className='checkbox' />
+                <span className="checkbox__text">Organization</span>
+                <span className="cbox__subtext">Any time a user is added, removed, or invited to an Organization. Organization hooks only.</span>
             </label>
             <br />
             <label>
-                <input name='isPublic' type='checkbox' checked={this.state.isPublic} onChange={this.handleCheckboxChange} />
-                Public
+                <input name='isPublic' type='checkbox' checked={this.state.isPublic} onChange={this.handleCheckboxChange} className='checkbox' />
+                <span className="checkbox__text">Public</span>
+                <span className="cbox__subtext">Any time a Repository changes from private to public.</span>
             </label>
             <br />
             <label>
-                <input name='isPush' type='checkbox' checked={this.state.isPush} onChange={this.handleCheckboxChange} />
-                Push
+                <input name='isPush' type='checkbox' checked={this.state.isPush} onChange={this.handleCheckboxChange} className='checkbox' />
+                <span className="checkbox__text">Push</span>
+                <span className="cbox__subtext">Any Git push to a Repository, including editing tags or branches. Commits via API actions that update references are also counted.</span>
             </label>
             <br />
             <label>
-                <input name='isRepository' type='checkbox' checked={this.state.isRepository} onChange={this.handleCheckboxChange} />
-                Repository
+                <input name='isRepository' type='checkbox' checked={this.state.isRepository} onChange={this.handleCheckboxChange} className='checkbox' />
+                <span className="checkbox__text">Repository</span>
+                <span className="cbox__subtext">Any time a Repository is created, deleted (organization hooks only), archived, unarchived, made public, or made private.</span>
             </label>
             <br />
             <label>
-                <input name='isReleases' type='checkbox' checked={this.state.isReleases} onChange={this.handleCheckboxChange} />
-                Releases
+                <input name='isReleases' type='checkbox' checked={this.state.isReleases} onChange={this.handleCheckboxChange} className='checkbox' />
+                <span className="checkbox__text">Releases</span>
+                <span className="cbox__subtext">Any time a Release is published in a Repository.</span>
             </label>
             <br />
             <label>
-                <input name='isTeam' type='checkbox' checked={this.state.isTeam} onChange={this.handleCheckboxChange} />
-                Team
+                <input name='isTeam' type='checkbox' checked={this.state.isTeam} onChange={this.handleCheckboxChange} className='checkbox' />
+                <span className="checkbox__text">Team</span>
+                <span className="cbox__subtext">Any time a team is created, deleted, modified, or added to or removed from a repository. Organization hooks only.</span>
             </label>
         </form>
     }
@@ -140,9 +147,10 @@ export class Settings extends React.Component {
         return <form>
             <p>Choose how you would like to be notified.</p>
             <label>
-                <input name='isEmail' type='checkbox' checked={this.state.isEmail} onChange={this.handleEmailChange} />
-                <span> Email to </span>
+                <input name='isEmail' type='checkbox' checked={this.state.isEmail} onChange={this.handleEmailChange} className='checkbox' />
+                <span className='checkbox__text'>Email to</span>
                 <input type='email' onChange={(event) => {this.setState({email: event.target.value, isEmail: false})}} defaultValue={this.state.email} />
+                <span className="cbox__subtext">Works best with gmail.</span>
             </label>
         </form>
     }
@@ -150,13 +158,13 @@ export class Settings extends React.Component {
     render() {
         return(
             <div className='row'>
-                <div className='col-md-12'>
+                <div className='col-md-6'>
                     <div className='cbox'>
                         <h1 className='cbox__title'>Subscriptions</h1>
                         {this.getSubscriptionSettings()}
                     </div>
                 </div>
-                <div className='col-md-12'>
+                <div className='col-md-6'>
                     <div className='cbox'>
                         <h1 className='cbox__title'>Notifications</h1>
                         {this.getNotificationSettings()}

@@ -32,7 +32,7 @@ function User(props) {
     return (
         <div className='sidebar__user'>
             <img src={getImgUrl()} alt={getUserName()} className='sidebar__image' />
-            <span>{getUserName()}</span>
+            <span className='sidebar__usertext'>{getUserName()}</span>
         </div>
     );
 }
