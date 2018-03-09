@@ -94,7 +94,12 @@ body {background-color:rgba(0,0,0,0.05);}
 
 .flash {
     /* position:fixed; */
+    color:rgba(0,0,0,0.6);
+    text-align:center;
 }
 .flashMsg {
     padding:10px;
+    background-color:rgba(0,0,255,0.5);
 }
+.flashMsg__success {background-color:rgba(0,255,0,0.5);}
+.flashMsg__fail {background-color:rgba(255,0,0,0.5);}

@@ -14,7 +14,8 @@ export class Settings extends React.Component {
             isReleases: false,
             isTeam: false,
             isLoading: false,
-            email: null
+            email: null,
+            isLoadingCheckbox: false
         }
         this.baseUrl = 'https://cnpqmk9lhh.execute-api.eu-central-1.amazonaws.com/prod';
         this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
@@ -54,7 +55,7 @@ export class Settings extends React.Component {
 
     // access_token 234d0560ec9b996f4286e7eab6f76a3e0c067c6a
     async handleCheckboxChange(event) {
-        event.target.disabled = true;
+        this.setState({isLoadingCheckbox: true});
         const isChecked = event.target.checked;
         const name = event.target.name;
 
@@ -66,11 +67,12 @@ export class Settings extends React.Component {
             await updateSubscriptionPromise({[name]: isChecked});
             await this.setState({[name]: isChecked});
             console.log('Subscription and webhook successfully added/updated.');
-            this.props.addFlashMessage('hello');
-            event.target.disabled = false;
+            this.props.addFlashMessage('flashMsg__success', 'Your settings for event ' + name + ' have been updated.');
+            this.setState({isLoadingCheckbox: false});
         }
         catch(error) {
             console.log('Unable to subscribe to this organization.');
+            this.props.addFlashMessage('flashMsg__fail', 'Your settings for event ' + name + ' have been updated.');
         }
     }
 
@@ -89,55 +91,55 @@ export class Settings extends React.Component {
         return <form>
             <p>Choose the events you would like to subscribe to.</p>
             <label>
-                <input disabled={false} name='isFork' type='checkbox' checked={this.state.isFork} onChange={this.handleCheckboxChange} className='checkbox' />
+                <input disabled={this.state.isLoadingCheckbox} name='isFork' type='checkbox' checked={this.state.isFork} onChange={this.handleCheckboxChange} className='checkbox' />
                 <span className="checkbox__text">Fork</span>
                 <span className="cbox__subtext">Any time a Repository is forked.</span>
             </label>
             <br />
             <label>
-                <input name='isMember' type='checkbox' checked={this.state.isMember} onChange={this.handleCheckboxChange} className='checkbox' />
+                <input disabled={this.state.isLoadingCheckbox} name='isMember' type='checkbox' checked={this.state.isMember} onChange={this.handleCheckboxChange} className='checkbox' />
                 <span className="checkbox__text">Member</span>
                 <span className="cbox__subtext">Any time a User is added or removed as a collaborator to a Repository, or has their permissions modified.</span>
             </label>
             <br />
             <label>
-                <input name='isMembership' type='checkbox' checked={this.state.isMembership} onChange={this.handleCheckboxChange} className='checkbox' />
+                <input disabled={this.state.isLoadingCheckbox} name='isMembership' type='checkbox' checked={this.state.isMembership} onChange={this.handleCheckboxChange} className='checkbox' />
                 <span className="checkbox__text">Membership</span>
                 <span className="cbox__subtext">Any time a User is added or removed from a team. Organization hooks only.</span>
             </label>
             <br />
             <label>
-                <input name='isOrganization' type='checkbox' checked={this.state.isOrganization} onChange={this.handleCheckboxChange} className='checkbox' />
+                <input disabled={this.state.isLoadingCheckbox} name='isOrganization' type='checkbox' checked={this.state.isOrganization} onChange={this.handleCheckboxChange} className='checkbox' />
                 <span className="checkbox__text">Organization</span>
                 <span className="cbox__subtext">Any time a user is added, removed, or invited to an Organization. Organization hooks only.</span>
             </label>
             <br />
             <label>
-                <input name='isPublic' type='checkbox' checked={this.state.isPublic} onChange={this.handleCheckboxChange} className='checkbox' />
+                <input disabled={this.state.isLoadingCheckbox} name='isPublic' type='checkbox' checked={this.state.isPublic} onChange={this.handleCheckboxChange} className='checkbox' />
                 <span className="checkbox__text">Public</span>
                 <span className="cbox__subtext">Any time a Repository changes from private to public.</span>
             </label>
             <br />
             <label>
-                <input name='isPush' type='checkbox' checked={this.state.isPush} onChange={this.handleCheckboxChange} className='checkbox' />
+                <input disabled={this.state.isLoadingCheckbox} name='isPush' type='checkbox' checked={this.state.isPush} onChange={this.handleCheckboxChange} className='checkbox' />
                 <span className="checkbox__text">Push</span>
                 <span className="cbox__subtext">Any Git push to a Repository, including editing tags or branches. Commits via API actions that update references are also counted.</span>
             </label>
             <br />
             <label>
-                <input name='isRepository' type='checkbox' checked={this.state.isRepository} onChange={this.handleCheckboxChange} className='checkbox' />
+                <input disabled={this.state.isLoadingCheckbox} name='isRepository' type='checkbox' checked={this.state.isRepository} onChange={this.handleCheckboxChange} className='checkbox' />
                 <span className="checkbox__text">Repository</span>
                 <span className="cbox__subtext">Any time a Repository is created, deleted (organization hooks only), archived, unarchived, made public, or made private.</span>
             </label>
             <br />
             <label>
-                <input name='isReleases' type='checkbox' checked={this.state.isReleases} onChange={this.handleCheckboxChange} className='checkbox' />
+                <input disabled={this.state.isLoadingCheckbox} name='isReleases' type='checkbox' checked={this.state.isReleases} onChange={this.handleCheckboxChange} className='checkbox' />
                 <span className="checkbox__text">Releases</span>
                 <span className="cbox__subtext">Any time a Release is published in a Repository.</span>
             </label>
             <br />
             <label>
-                <input name='isTeam' type='checkbox' checked={this.state.isTeam} onChange={this.handleCheckboxChange} className='checkbox' />
+                <input disabled={this.state.isLoadingCheckbox} name='isTeam' type='checkbox' checked={this.state.isTeam} onChange={this.handleCheckboxChange} className='checkbox' />
                 <span className="checkbox__text">Team</span>
                 <span className="cbox__subtext">Any time a team is created, deleted, modified, or added to or removed from a repository. Organization hooks only.</span>
             </label>
