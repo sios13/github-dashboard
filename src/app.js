@@ -21,7 +21,7 @@ export class GithubDashboardApp extends React.Component {
             flashMsgs: []
         };
         this.baseUrl = 'https://cnpqmk9lhh.execute-api.eu-central-1.amazonaws.com/prod';
-        
+
         this.io = io('localhost:3001');
         this.io.on('message', function(data) {
             console.log('Message from socket server: ' + data);
@@ -37,7 +37,7 @@ export class GithubDashboardApp extends React.Component {
 
     addFlashMessage(type, text) {
         let remove = function(index) {
-            let array = this.state.flashMsgs.filter(x => x.key !== index);
+            let array = this.state.flashMsgs.filter(x => parseInt(x.key, 10) !== index);
             this.setState({flashMsgs: array});
         }
         this.setState({
@@ -45,8 +45,26 @@ export class GithubDashboardApp extends React.Component {
         });
     }
 
+    /* ACTIVITY */
+    getActivity(username, organization) {
+        return fetch(this.baseUrl + '/activity/' + username + '/' + organization)
+        .then(response => response.json())
+        .then(response => response.activity)
+    }
+
+    updateActivity(username, organization, settings) {
+        let options = {
+            method: 'post',
+            body: JSON.stringify(settings)
+        }
+        return fetch(this.baseUrl + '/activity/' + username + '/' + organization, options)
+        .then(response => response.json())
+        .then(response => console.log(response))
+    }
+
     /* USER CRUD */
     getUser(username) {
+        // username = username || this.state.user.username;
         return fetch(this.baseUrl + '/users/' + username)
         .then(response => response.json())
         .then(response => response.user);
@@ -137,7 +155,13 @@ export class GithubDashboardApp extends React.Component {
             return response.json();
         })
         .then(response => {
-            let organizations = response.map(organization => organization.login);
+            let organizations = response.map(org => {
+                return {
+                    name: org.login,
+                    description: org.description,
+                    url: org.html_url
+                }
+            });
             this.setState({organizations: organizations});
         })
         .catch(error => this.setState({organizations: []}));
@@ -162,7 +186,6 @@ export class GithubDashboardApp extends React.Component {
     }
 
     login() {
-        // if (!localStorage.getItem('access_token')) return;
         Promise.all([this.makeUser(), this.makeOrganizations()])
         .then(result => {
             if (localStorage.getItem('access_token')) {
@@ -176,43 +199,43 @@ export class GithubDashboardApp extends React.Component {
         this.setState({user: {}, organizations: [], activeOrg: null});
     }
 
-    handleRender() {
-        if (localStorage.getItem('access_token')) {
-            return <div className='row'>
-                <div className='sidebar col-md-2'>
-                    <Sidebar user={this.state.user} organizations={this.state.organizations} onOrgChange={this.onOrgChange.bind(this)} activeOrg={this.state.activeOrg}/>
-                </div>
-                <div className='col-md-10 offset-md-2'>
-                    <div className='flash'>{this.state.flashMsgs}</div>
-                </div>
-                <div className='col-md-10 offset-md-2'>
-                    <Route exact path='/' render={props => <Dashboard activeOrg={this.state.activeOrg} {...props}/>}/>
-                    <Route path='/settings' render={props => <Settings
-                        user={this.state.user}
-                        activeOrg={this.state.activeOrg}
-                        addWebhook={this.addWebhook.bind(this)}
-                        getSubscription={this.getSubscription.bind(this)}
-                        getNotificationSettings={this.getNotificationSettings.bind(this)}
-                        updateNotificationSetting={this.updateNotificationSetting.bind(this)}
-                        updateUser={this.updateUser.bind(this)}
-                        updateSubscription={this.updateSubscription.bind(this)}
-                        addFlashMessage={this.addFlashMessage.bind(this)}
-                        {...props}
-                    />}/>
-                    <Route path='/respositories' component={Repositories}/>
-                    <Route path='/login' render={(props) => <Login login={this.login.bind(this)} {...props}/>}/>
-                    <Route path='/logout' render={(props) => <Logout logout={this.logout.bind(this)} {...props}/>}/>
-                </div>
-            </div>
-        }
-        return <a href='https://github.com/login/oauth/authorize?client_id=460281c3aceac1aed9cd&amp;allow_signup=false&amp;scope=repo,user,admin:org_hook'>Login</a>
-    }
-
     render() {
         return(
             <Router>
                 <div className='container-fluid'>
-                    {this.handleRender()}
+                    <div className='row'>
+                        <div className='sidebar col-md-2'>
+                            <Sidebar user={this.state.user} organizations={this.state.organizations} onOrgChange={this.onOrgChange.bind(this)} activeOrg={this.state.activeOrg}/>
+                        </div>
+                        <div className='col-md-10 offset-md-2'>
+                            <div className='flash'>{this.state.flashMsgs}</div>
+                        </div>
+                        <div className='col-md-10 offset-md-2'>
+                            <Route exact path='/' render={props => <Dashboard
+                                activeOrg={this.state.activeOrg}
+                                user={this.state.user}
+                                updateUser={this.updateUser.bind(this)}
+                                getActivity={this.getActivity.bind(this)}
+                                updateActivity={this.updateActivity.bind(this)}
+                                {...props}/>
+                            }/>
+                            <Route path='/settings' render={props => <Settings
+                                user={this.state.user}
+                                activeOrg={this.state.activeOrg}
+                                // addSubscription={this.addSubscription.bind(this)}
+                                addWebhook={this.addWebhook.bind(this)}
+                                getSubscription={this.getSubscription.bind(this)}
+                                getNotificationSettings={this.getNotificationSettings.bind(this)}
+                                updateNotificationSetting={this.updateNotificationSetting.bind(this)}
+                                updateUser={this.updateUser.bind(this)}
+                                updateSubscription={this.updateSubscription.bind(this)}
+                                addFlashMessage={this.addFlashMessage.bind(this)}
+                                {...props}
+                            />}/>
+                            <Route path='/login' render={(props) => <Login login={this.login.bind(this)} {...props}/>}/>
+                            <Route path='/logout' render={(props) => <Logout logout={this.logout.bind(this)} {...props}/>}/>
+                        </div>
+                    </div>
                 </div>
             </Router>
         );
@@ -228,7 +251,6 @@ class Login extends React.Component {
         if (githubCode && !access_token) {
             this.getAccessToken(githubCode);
         }
-        console.log(access_token);
     }
 
     getAccessToken(githubCode) {

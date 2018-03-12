@@ -25,32 +25,36 @@ export class Settings extends React.Component {
     componentDidMount() {
         // load subscription settings
         // this.props.getSubscription();
+        this.loadSettings();
     }
 
-    async componentDidUpdate(prevProps, prevState) {
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.user !== this.props.user || prevProps.activeOrg !== this.props.activeOrg) {
+            this.loadSettings();
+        }
+    }
+
+    async loadSettings() {
         if (this.props.user === null || this.props.activeOrg === null) return
 
-        if (prevProps.user !== this.props.user || prevProps.activeOrg !== this.props.activeOrg) {
-            await this.setState({isLoading: true});
+        await this.setState({isLoading: true});
+        let subscription = await this.props.getSubscription() || {};
+        await this.setState({
+            isFork: subscription.isFork || false,
+            isMember: subscription.isMember || false,
+            isMembership: subscription.isMembership || false,
+            isOrganization: subscription.isOrganization || false,
+            isPublic: subscription.isPublic || false,
+            isPush: subscription.isPush || false,
+            isRepository: subscription.isRepository || false,
+            isReleases: subscription.isReleases || false,
+            isTeam: subscription.isTeam || false
+        });
 
-            let subscription = await this.props.getSubscription() || {};
-            await this.setState({
-                isFork: subscription.isFork || false,
-                isMember: subscription.isMember || false,
-                isMembership: subscription.isMembership || false,
-                isOrganization: subscription.isOrganization || false,
-                isPublic: subscription.isPublic || false,
-                isPush: subscription.isPush || false,
-                isRepository: subscription.isRepository || false,
-                isReleases: subscription.isReleases || false,
-                isTeam: subscription.isTeam || false
-            });
-
-            let notificationSettings = await this.props.getNotificationSettings() || {};
-            await this.setState({isEmail: notificationSettings.isEmail || false});
-            await this.setState({email: this.props.user.email});
-            await this.setState({isLoading: false});
-        }
+        let notificationSettings = await this.props.getNotificationSettings() || {};
+        await this.setState({isEmail: notificationSettings.isEmail || false});
+        await this.setState({email: this.props.user.email});
+        await this.setState({isLoading: false});
     }
 
     // access_token 234d0560ec9b996f4286e7eab6f76a3e0c067c6a
@@ -72,7 +76,7 @@ export class Settings extends React.Component {
         }
         catch(error) {
             console.log('Unable to subscribe to this organization.');
-            this.props.addFlashMessage('flashMsg__fail', 'Your settings for event ' + name + ' have been updated.');
+            this.props.addFlashMessage('flashMsg__fail', 'Your settings for event ' + name + ' could not be updated.');
         }
     }
 
