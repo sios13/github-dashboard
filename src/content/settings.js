@@ -23,9 +23,9 @@ export class Settings extends React.Component {
     }
 
     componentDidMount() {
-        // load subscription settings
-        // this.props.getSubscription();
-        this.loadSettings();
+        if (this.props.activeOrg) {
+            this.loadSettings();
+        }
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -71,12 +71,13 @@ export class Settings extends React.Component {
             await updateSubscriptionPromise({[name]: isChecked});
             await this.setState({[name]: isChecked});
             console.log('Subscription and webhook successfully added/updated.');
-            this.props.addFlashMessage('flashMsg__success', 'Your settings for event ' + name + ' have been updated.');
+            this.props.addFlashMessage('flashMsg__success', 'Your subscription settings for event ' + name + ' have been updated.');
             this.setState({isLoadingCheckbox: false});
         }
         catch(error) {
             console.log('Unable to subscribe to this organization.');
-            this.props.addFlashMessage('flashMsg__fail', 'Your settings for event ' + name + ' could not be updated.');
+            this.props.addFlashMessage('flashMsg__fail', 'Your subscription settings for event ' + name + ' could not be updated.');
+            this.setState({isLoadingCheckbox: false});
         }
     }
 
@@ -84,13 +85,18 @@ export class Settings extends React.Component {
         let updateNotificationPromise = this.props.updateNotificationSetting;
         let updateUserPromise = this.props.updateUser;
 
-        await updateNotificationPromise({isEmail: event.target.checked});
-        await updateUserPromise({email: this.state.email})
+        try {
+            await updateNotificationPromise({isEmail: event.target.checked});
+            await updateUserPromise({email: this.state.email});
+            this.props.addFlashMessage('flashMsg__success', 'Your notification settings have been updated.');
+        }
+        catch(error) {
+            this.props.addFlashMessage('flashMsg__fail', 'Your notification settings could not be updated.');
+        }
         await this.setState({isEmail: this.state.isEmail ? false : true});
     }
 
     getSubscriptionSettings() {
-        if (this.props.activeOrg === null) return <p>Select organization.</p>
         if (this.state.isLoading) return <p>Loading...</p>
         return <form>
             <p>Choose the events you would like to subscribe to.</p>
@@ -151,7 +157,6 @@ export class Settings extends React.Component {
     }
 
     getNotificationSettings() {
-        if (this.props.activeOrg === null) return <p>Select organization.</p>
         if (this.state.isLoading) return <p>Loading...</p>
         return <form>
             <p>Choose how you would like to be notified.</p>
@@ -164,9 +169,9 @@ export class Settings extends React.Component {
         </form>
     }
 
-    render() {
-        return(
-            <div className='row'>
+    handleRender() {
+        if (this.props.activeOrg) {
+            return <div className='row'>
                 <div className='col-md-6'>
                     <div className='cbox'>
                         <h1 className='cbox__title'>Subscriptions</h1>
@@ -180,6 +185,22 @@ export class Settings extends React.Component {
                     </div>
                 </div>
             </div>
+        }
+        else {
+            return <div className='row'>
+                <div className='col-md-12'>
+                    <div className='cbox'>
+                        <h1 className='cbox__title'>Settings</h1>
+                        <p><i>Select an organization.</i></p>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    render() {
+        return(
+            this.handleRender()
         );
     }
 }

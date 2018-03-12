@@ -15,10 +15,15 @@ export class Sidebar extends React.Component {
                     onOrgChange={this.props.onOrgChange}
                     activeOrg={this.props.activeOrg}
                 />
-                <NavLink className='sidebar__item' activeClassName='sidebar__item--active' to='/' exact={true}><FontAwesome name='rocket' /> Dashboard</NavLink>
-                <NavLink className='sidebar__item' activeClassName='sidebar__item--active' to='/settings'><FontAwesome name='fas fa-cog' /> Settings</NavLink>
-                <NavLink className='sidebar__item' activeClassName='sidebar__item--active' to='/logout'><FontAwesome name='fas fa-sign-out' /> Logout</NavLink>
-                <NavLink className='sidebar__item' activeClassName='sidebar__item--active' to='/login'>Login</NavLink>
+                <NavLink className='sidebar__item' activeClassName='sidebar__item--active' to='/' exact={true}>
+                    <FontAwesome name='rocket' /> Dashboard{this.props.hasUnreadNotifications ? <FontAwesome name='fas fa-exclamation sidebar__alert' /> : ''}
+                </NavLink>
+                <NavLink className='sidebar__item' activeClassName='sidebar__item--active' to='/settings'>
+                    <FontAwesome name='fas fa-cog' /> Settings
+                </NavLink>
+                <NavLink className='sidebar__item' activeClassName='sidebar__item--active' to='/logout'>
+                    <FontAwesome name='fas fa-sign-out' /> Logout
+                </NavLink>
             </div>
         );
     }

@@ -11,10 +11,10 @@ export class Dashboard extends React.Component {
     }
 
     componentDidMount() {
-        // this.makeRepos();
-        // this.getEvents();
-        this.getOrg();
-        if (this.props.user !== null) this.getEvents();
+        if (this.props.activeOrg) {
+            this.getOrg();
+            if (this.props.user !== null) this.getEvents();
+        }
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -41,6 +41,7 @@ export class Dashboard extends React.Component {
                     time: event.time
                 }
             });
+            events.sort(function(a,b) {return (b.time > a.time) ? 1 : ((a.time > b.time) ? -1 : 0);} );
             let eventsHtml = events.map((event, i) => {
                 let test = new Date(event.time);
                 let text = '';
@@ -52,7 +53,7 @@ export class Dashboard extends React.Component {
                 if (event.type === 'push') text = 'Made a push to a reposotory.'
                 if (event.type === 'repository') text = 'Made a change to a repository.'
                 if (event.type === 'release') text = 'Made a release.'
-                if (event.type === 'team') text = 'Created, deleted, modified a team.'
+                if (event.type === 'team') text = 'Created, deleted or modified a team.'
                 return <div className={'event' + (event.time > userLastActive ? ' event--highlight' : '')} key={i}>
                     <img className='event__image' src={event.body.sender.avatar_url} alt='Sender' />
                     <span className='event__time'>{test.toLocaleDateString() + ' ' + test.toLocaleTimeString()}</span>
@@ -66,6 +67,8 @@ export class Dashboard extends React.Component {
         let date = new Date();
         let time = date.getTime();
         this.props.updateActivity(this.props.user.username, this.props.activeOrg, {time: time});
+        this.props.setNotificationsRead();
+        this.props.updateUser({hasUnreadNotifications: false})
         // await this.props.updateUser({active: 123});
     }
 
@@ -82,9 +85,9 @@ export class Dashboard extends React.Component {
         })
     }
 
-    render() {
-        return(
-            <div className='row'>
+    handleRender() {
+        if (this.props.activeOrg) {
+            return <div className='row'>
                 <div className='col-md-6 col-sm-12'>
                     {this.state.org}
                 </div>
@@ -96,6 +99,22 @@ export class Dashboard extends React.Component {
                     </div>
                 </div>
             </div>
+        }
+        else {
+            return <div className='row'>
+                <div className='col-md-12'>
+                    <div className='cbox'>
+                        <h1 className='cbox__title'>Dashboard</h1>
+                        <p><i>Select an organization.</i></p>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    render() {
+        return(
+            this.handleRender()
         );
     }
 }

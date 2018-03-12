@@ -9,7 +9,6 @@ import io from 'socket.io-client';
 import Sidebar from './sidebar';
 import Dashboard from './content/dashboard';
 import Settings from './content/settings';
-import Repositories from './content/repositories';
 
 export class GithubDashboardApp extends React.Component {
     constructor(props) {
@@ -18,21 +17,54 @@ export class GithubDashboardApp extends React.Component {
             user: null,
             organizations: null,
             activeOrg: null,
-            flashMsgs: []
+            flashMsgs: [],
+            isLoading: false,
+            hasUnreadNotifications: false
         };
         this.baseUrl = 'https://cnpqmk9lhh.execute-api.eu-central-1.amazonaws.com/prod';
 
         this.io = io('localhost:3001');
-        this.io.on('message', function(data) {
+        this.io.on('webhook', function(data) {
             console.log('Message from socket server: ' + data);
-        });
+            this.setState({hasUnreadNotifications: true});
+            this.updateUser({hasUnreadNotifications: true})
+        }.bind(this));
         this.io.on('connect', function() {
             console.log('Connected to socket server.');
         });
     }
 
-    componentDidMount() {
-        this.login();
+    async componentDidMount() {
+        let githubCode = queryString.parse(window.location.search).code;
+        let access_token = localStorage.getItem('access_token');
+        if (githubCode && !access_token) {
+            await this.setAccessToken(githubCode);
+        }
+
+        if (localStorage.getItem('access_token')) {
+            this.setState({isLoading: true});
+            this.login();
+            this.setState({isLoading: false});
+        }
+    }
+
+    setNotificationsRead() {
+        this.setState({hasUnreadNotifications: false});
+    }
+
+    setAccessToken(githubCode) {
+        fetch('https://cnpqmk9lhh.execute-api.eu-central-1.amazonaws.com/prod/login', {
+            method: 'post',
+            body: JSON.stringify({
+                code: githubCode
+            })
+        })
+        .then((response) => { return response.json(); })
+        .then((response) => {
+            let access_token = JSON.parse(response.message).access_token;
+            localStorage.setItem('access_token', access_token);
+            this.login();
+        });
     }
 
     addFlashMessage(type, text) {
@@ -40,8 +72,12 @@ export class GithubDashboardApp extends React.Component {
             let array = this.state.flashMsgs.filter(x => parseInt(x.key, 10) !== index);
             this.setState({flashMsgs: array});
         }
+        let flashMsgDiv = <div className={type + ' flashMsg cbox'} onClick={remove.bind(this, this.state.flashMsgs.length)} key={this.state.flashMsgs.length}>
+            {text}
+            <div className='flashMsg__mini'>Click me to hide.</div>
+        </div>;
         this.setState({
-            flashMsgs: [<div className={type + ' flashMsg cbox'} onClick={remove.bind(this, this.state.flashMsgs.length)} key={this.state.flashMsgs.length}>{text}</div>, ...this.state.flashMsgs]
+            flashMsgs: [flashMsgDiv, ...this.state.flashMsgs]
         });
     }
 
@@ -186,7 +222,7 @@ export class GithubDashboardApp extends React.Component {
     }
 
     login() {
-        Promise.all([this.makeUser(), this.makeOrganizations()])
+        return Promise.all([this.makeUser(), this.makeOrganizations()])
         .then(result => {
             if (localStorage.getItem('access_token')) {
                 this.io.emit('room', this.state.user.username);
@@ -199,43 +235,70 @@ export class GithubDashboardApp extends React.Component {
         this.setState({user: {}, organizations: [], activeOrg: null});
     }
 
+    handleRender() {
+        if (localStorage.getItem('access_token')) {
+            return <div className='row'>
+                <div className='sidebar col-md-2'>
+                    <Sidebar
+                        user={this.state.user}
+                        organizations={this.state.organizations}
+                        onOrgChange={this.onOrgChange.bind(this)}
+                        activeOrg={this.state.activeOrg}
+                        hasUnreadNotifications={this.state.hasUnreadNotifications}
+                    />
+                </div>
+                <div className='col-md-10 offset-md-2'>
+                    <div className='flash'>{this.state.flashMsgs}</div>
+                </div>
+                <div className='col-md-10 offset-md-2'>
+                    <Route exact path='/' render={props => <Dashboard
+                        activeOrg={this.state.activeOrg}
+                        user={this.state.user}
+                        updateUser={this.updateUser.bind(this)}
+                        getActivity={this.getActivity.bind(this)}
+                        updateActivity={this.updateActivity.bind(this)}
+                        // hasUnreadNotifications={this.state.hasUnreadNotifications}
+                        setNotificationsRead={this.setNotificationsRead.bind(this)}
+                        {...props}/>
+                    }/>
+                    <Route path='/settings' render={props => <Settings
+                        user={this.state.user}
+                        activeOrg={this.state.activeOrg}
+                        // addSubscription={this.addSubscription.bind(this)}
+                        addWebhook={this.addWebhook.bind(this)}
+                        getSubscription={this.getSubscription.bind(this)}
+                        getNotificationSettings={this.getNotificationSettings.bind(this)}
+                        updateNotificationSetting={this.updateNotificationSetting.bind(this)}
+                        updateUser={this.updateUser.bind(this)}
+                        updateSubscription={this.updateSubscription.bind(this)}
+                        addFlashMessage={this.addFlashMessage.bind(this)}
+                        {...props}
+                    />}/>
+                    <Route path='/logout' render={(props) => <Logout logout={this.logout.bind(this)} {...props}/>}/>
+                </div>
+            </div>
+        }
+        else {
+            return <div className='row'>
+                <div className='col-md-4 offset-md-4 col-sm-12'>
+                    <div className='cbox loginbox'>
+                        <h1 className='cbox__title'>Github Dashboard</h1>
+                        <p>View your organizations and subscribe to events.</p>
+                        <p>
+                            <a className='btn btn-info' href='https://github.com/login/oauth/authorize?client_id=460281c3aceac1aed9cd&amp;allow_signup=false&amp;scope=repo,user,admin:org_hook'>Login with Github</a>
+                        </p>
+                    </div>
+                    <p className='loginbox__byline'>Made by <a href='http://github.com/sios13'>sios13</a></p>
+                </div>
+            </div>
+        }
+    }
+
     render() {
         return(
             <Router>
                 <div className='container-fluid'>
-                    <div className='row'>
-                        <div className='sidebar col-md-2'>
-                            <Sidebar user={this.state.user} organizations={this.state.organizations} onOrgChange={this.onOrgChange.bind(this)} activeOrg={this.state.activeOrg}/>
-                        </div>
-                        <div className='col-md-10 offset-md-2'>
-                            <div className='flash'>{this.state.flashMsgs}</div>
-                        </div>
-                        <div className='col-md-10 offset-md-2'>
-                            <Route exact path='/' render={props => <Dashboard
-                                activeOrg={this.state.activeOrg}
-                                user={this.state.user}
-                                updateUser={this.updateUser.bind(this)}
-                                getActivity={this.getActivity.bind(this)}
-                                updateActivity={this.updateActivity.bind(this)}
-                                {...props}/>
-                            }/>
-                            <Route path='/settings' render={props => <Settings
-                                user={this.state.user}
-                                activeOrg={this.state.activeOrg}
-                                // addSubscription={this.addSubscription.bind(this)}
-                                addWebhook={this.addWebhook.bind(this)}
-                                getSubscription={this.getSubscription.bind(this)}
-                                getNotificationSettings={this.getNotificationSettings.bind(this)}
-                                updateNotificationSetting={this.updateNotificationSetting.bind(this)}
-                                updateUser={this.updateUser.bind(this)}
-                                updateSubscription={this.updateSubscription.bind(this)}
-                                addFlashMessage={this.addFlashMessage.bind(this)}
-                                {...props}
-                            />}/>
-                            <Route path='/login' render={(props) => <Login login={this.login.bind(this)} {...props}/>}/>
-                            <Route path='/logout' render={(props) => <Logout logout={this.logout.bind(this)} {...props}/>}/>
-                        </div>
-                    </div>
+                    {this.handleRender()}
                 </div>
             </Router>
         );
@@ -244,39 +307,24 @@ export class GithubDashboardApp extends React.Component {
 
 // click link with client_id -> github login -> github get client url with code (?code=123123123)
 // -> client post code to server -> server use code, client_id, client_secret to get access_token -> access_token to client!
-class Login extends React.Component {
-    componentDidMount() {
-        let githubCode = queryString.parse(this.props.location.search).code;
-        let access_token = localStorage.getItem('access_token');
-        if (githubCode && !access_token) {
-            this.getAccessToken(githubCode);
-        }
-    }
+// class Login extends React.Component {
+//     componentDidMount() {
+//         let githubCode = queryString.parse(this.props.location.search).code;
+//         let access_token = localStorage.getItem('access_token');
+//         if (githubCode && !access_token) {
+//             this.getAccessToken(githubCode);
+//         }
+//     }
 
-    getAccessToken(githubCode) {
-        fetch('https://cnpqmk9lhh.execute-api.eu-central-1.amazonaws.com/prod/login', {
-            method: 'post',
-            body: JSON.stringify({
-                code: githubCode
-            })
-        })
-        .then((response) => { return response.json(); })
-        .then((response) => {
-            let access_token = JSON.parse(response.message).access_token;
-            localStorage.setItem('access_token', access_token);
-            this.props.login();
-        });
-    }
-
-    render() {
-        return(
-            <div className='cbox row'>
-                <h1 className='cbox__title'>Login</h1>
-                <a href='https://github.com/login/oauth/authorize?client_id=460281c3aceac1aed9cd&amp;allow_signup=false&amp;scope=repo,user,admin:org_hook'>Login</a>
-            </div>
-        );
-    }
-}
+//     render() {
+//         return(
+//             <div className='cbox row'>
+//                 <h1 className='cbox__title'>Login</h1>
+//                 <a href='https://github.com/login/oauth/authorize?client_id=460281c3aceac1aed9cd&amp;allow_signup=false&amp;scope=repo,user,admin:org_hook'>Login</a>
+//             </div>
+//         );
+//     }
+// }
 
 class Logout extends React.Component {
     // syntetic event istället?

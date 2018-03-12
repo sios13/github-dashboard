@@ -34,18 +34,22 @@ body {background-color:rgba(0,0,0,0.05);}
     float:left;
     width:100%;
     padding:10px 20px;
-    color:rgba(0,0,0,0.8);
+    color:rgba(0,0,0,0.7);
 }
 .sidebar__item:hover, .sidebar__item--active {
     text-decoration:none;
-    color:rgba(0,0,0,1);
-    background-color:rgba(0,0,0,0.04);
+    color:rgba(0,0,0,0.9);
+    background-color:aliceblue;
     /* box-shadow: inset 0 -5px 5px -5px rgba(0,0,0,1); */
 }
+.sidebar__alert {color:red; margin-left:7px;}
 .sidebar__dropdown {
     margin:5px;
-    background-color:rgba(255,255,255,0.85);
-    border:0;
+    margin-bottom:20px;
+}
+.Dropdown-control {
+    background-color:rgba(255,255,255,0.85) !important;
+    border-radius:5px !important;
 }
 
 .cbox {
@@ -53,6 +57,7 @@ body {background-color:rgba(0,0,0,0.05);}
     box-shadow:0px 0px 5px rgba(0,0,0,0.1);
     color:rgba(0,0,0,0.65);
     margin-top:15px;
+    margin-bottom:15px;
     padding:15px;
 }
 .cbox__title {
@@ -68,6 +73,17 @@ body {background-color:rgba(0,0,0,0.05);}
     padding-bottom:13px;
 }
 .cbox a {color:rgba(0,0,0,0.65);}
+
+.loginbox {
+    /* position: relative;
+    top: 100%; */
+    margin-top:200px;
+    padding-top:30px;
+    text-align:center;
+}
+.loginbox a {color:white;}
+.loginbox__byline {text-align:center; margin-top:20px; color:rgba(0,0,0,0.35);}
+.loginbox__byline a {color:rgba(0,0,0,0.35);}
 
 .checkbox {}
 .checkbox__text {
@@ -99,18 +115,21 @@ body {background-color:rgba(0,0,0,0.05);}
 
 .flash {
     /* position:fixed; */
-    color:rgba(0,0,0,0.6);
+    color:rgba(0,0,0,0.75);
     text-align:center;
 }
 .flashMsg {
     padding:10px;
     background-color:rgba(0,0,255,0.5);
+    margin:0;
+    margin-top:15px;
 }
+.flashMsg__mini {font-size:12px; color:rgba(0,0,0,0.5);}
 .flashMsg__success {background-color:rgba(0,255,0,0.5);}
 .flashMsg__fail {background-color:rgba(255,0,0,0.5);}
 
 .event {display:block; overflow:auto; padding:10px; height:90px; font-size:15px; color:rgba(0,0,0,0.7); margin-bottom:10px;}
-.event--highlight {background-color:rgba(255,0,0,0.12);}
+.event--highlight {background-color:aliceblue;}
 .event__image {float:left; height:100%; margin-right:10px;}
 .event__time {display:block; font-style:italic; color:rgba(0,0,0,0.45);}
 .event__type {display:block;}
