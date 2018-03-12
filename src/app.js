@@ -23,7 +23,8 @@ export class GithubDashboardApp extends React.Component {
         };
         this.baseUrl = 'https://cnpqmk9lhh.execute-api.eu-central-1.amazonaws.com/prod';
 
-        this.io = io('localhost:3001');
+        // this.io = io('localhost:3001');
+        this.io = io('http://ec2-18-197-144-88.eu-central-1.compute.amazonaws.com:81/');
         this.io.on('webhook', function(data) {
             console.log('Message from socket server: ' + data);
             this.setState({hasUnreadNotifications: true});
@@ -288,7 +289,7 @@ export class GithubDashboardApp extends React.Component {
                             <a className='btn btn-info' href='https://github.com/login/oauth/authorize?client_id=460281c3aceac1aed9cd&amp;allow_signup=false&amp;scope=repo,user,admin:org_hook'>Login with Github</a>
                         </p>
                     </div>
-                    <p className='loginbox__byline'>Made by <a href='http://github.com/sios13'>sios13</a></p>
+                    <p className='loginbox__byline'>Made by <a href='http://github.com/sios13'>Simon Österdahl</a></p>
                 </div>
             </div>
         }
