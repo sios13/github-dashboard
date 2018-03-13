@@ -63,6 +63,7 @@ export class Dashboard extends React.Component {
                     <span className='event__user'>by <a href={event.body.sender.html_url}>{event.body.sender.login}</a></span>
                 </div>
             });
+            if (eventsHtml.length === 0) eventsHtml = <p><i>No events found.</i></p>
             this.setState({events: eventsHtml});
         })
 

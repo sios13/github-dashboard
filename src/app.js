@@ -124,7 +124,13 @@ export class GithubDashboardApp extends React.Component {
         }
         return fetch(this.baseUrl + '/users/' + this.state.user.username, options)
         .then(response => response.json())
-        .then(response => console.log(response));
+        .then(response => {
+            console.log(response);
+            this.getUser(this.state.user.username)
+            .then((user) => {
+                this.setState({user: user});
+            })
+        });
     }
 
     /* NOTIFICATION CRUD */
