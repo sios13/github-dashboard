@@ -18,7 +18,6 @@ export class GithubDashboardApp extends React.Component {
             organizations: null,
             activeOrg: null,
             flashMsgs: [],
-            isLoading: false,
             hasUnreadNotifications: false
         };
         this.baseUrl = 'https://cnpqmk9lhh.execute-api.eu-central-1.amazonaws.com/prod';
@@ -28,7 +27,7 @@ export class GithubDashboardApp extends React.Component {
         this.io.on('webhook', function(data) {
             console.log('Message from socket server: ' + data);
             this.setState({hasUnreadNotifications: true});
-            this.updateUser({hasUnreadNotifications: true})
+            this.updateUser({hasUnreadNotifications: true}) // TODO gör detta på servern
         }.bind(this));
         this.io.on('connect', function() {
             console.log('Connected to socket server.');
@@ -258,14 +257,12 @@ export class GithubDashboardApp extends React.Component {
                         updateUser={this.updateUser.bind(this)}
                         getActivity={this.getActivity.bind(this)}
                         updateActivity={this.updateActivity.bind(this)}
-                        // hasUnreadNotifications={this.state.hasUnreadNotifications}
                         setNotificationsRead={this.setNotificationsRead.bind(this)}
                         {...props}/>
                     }/>
                     <Route path='/settings' render={props => <Settings
                         user={this.state.user}
                         activeOrg={this.state.activeOrg}
-                        // addSubscription={this.addSubscription.bind(this)}
                         addWebhook={this.addWebhook.bind(this)}
                         getSubscription={this.getSubscription.bind(this)}
                         getNotificationSettings={this.getNotificationSettings.bind(this)}
@@ -305,27 +302,6 @@ export class GithubDashboardApp extends React.Component {
         );
     }
 }
-
-// click link with client_id -> github login -> github get client url with code (?code=123123123)
-// -> client post code to server -> server use code, client_id, client_secret to get access_token -> access_token to client!
-// class Login extends React.Component {
-//     componentDidMount() {
-//         let githubCode = queryString.parse(this.props.location.search).code;
-//         let access_token = localStorage.getItem('access_token');
-//         if (githubCode && !access_token) {
-//             this.getAccessToken(githubCode);
-//         }
-//     }
-
-//     render() {
-//         return(
-//             <div className='cbox row'>
-//                 <h1 className='cbox__title'>Login</h1>
-//                 <a href='https://github.com/login/oauth/authorize?client_id=460281c3aceac1aed9cd&amp;allow_signup=false&amp;scope=repo,user,admin:org_hook'>Login</a>
-//             </div>
-//         );
-//     }
-// }
 
 class Logout extends React.Component {
     // syntetic event istället?

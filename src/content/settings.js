@@ -1,4 +1,5 @@
 import React from 'react';
+import FontAwesome from 'react-fontawesome';
 
 export class Settings extends React.Component {
     constructor(props) {
@@ -97,7 +98,7 @@ export class Settings extends React.Component {
     }
 
     getSubscriptionSettings() {
-        if (this.state.isLoading) return <p>Loading...</p>
+        if (this.state.isLoading) return <p><FontAwesome name='fas fa-spinner' spin /> <i>Loading...</i></p>
         return <form>
             <p>Choose the events you would like to subscribe to.</p>
             <label>
@@ -157,7 +158,7 @@ export class Settings extends React.Component {
     }
 
     getNotificationSettings() {
-        if (this.state.isLoading) return <p>Loading...</p>
+        if (this.state.isLoading) return <p><FontAwesome name='fas fa-spinner' spin /> <i>Loading...</i></p>
         return <form>
             <p>Choose how you would like to be notified.</p>
             <label>

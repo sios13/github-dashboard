@@ -16,7 +16,7 @@ export class Sidebar extends React.Component {
                     activeOrg={this.props.activeOrg}
                 />
                 <NavLink className='sidebar__item' activeClassName='sidebar__item--active' to='/' exact={true}>
-                    <FontAwesome name='rocket' /> Dashboard{this.props.hasUnreadNotifications ? <FontAwesome name='fas fa-exclamation sidebar__alert' /> : ''}
+                    <FontAwesome name='rocket' /> Dashboard{this.props.hasUnreadNotifications ? <FontAwesome name='fas fa-exclamation' className='sidebar__alert' /> : ''}
                 </NavLink>
                 <NavLink className='sidebar__item' activeClassName='sidebar__item--active' to='/settings'>
                     <FontAwesome name='fas fa-cog' /> Settings

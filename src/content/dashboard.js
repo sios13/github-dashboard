@@ -1,4 +1,5 @@
 import React from 'react';
+import FontAwesome from 'react-fontawesome';
 
 export class Dashboard extends React.Component {
     constructor(props) {
@@ -25,7 +26,8 @@ export class Dashboard extends React.Component {
     }
 
     async getEvents() {
-        // let userLastActive = this.props.user.active || 0;
+        this.setState({events: <p><FontAwesome name='fas fa-spinner' spin /> <i>Loading events...</i></p>});
+
         let activity = await this.props.getActivity(this.props.user.username, this.props.activeOrg)
         activity = activity[0] || {};
         let userLastActive = activity.time || 0;
@@ -73,10 +75,12 @@ export class Dashboard extends React.Component {
     }
 
     getOrg() {
+        this.setState({org: <p><FontAwesome name='fas fa-spinner' spin /> <i>Loading organization...</i></p>});
+
         fetch('http://api.github.com/orgs/' + this.props.activeOrg)
         .then(response => response.json())
         .then(org => {
-            let orgHtml = <div className='cbox'>
+            let orgHtml = <div>
                 <h1 className='cbox__title'>{org.name || org.login}</h1>
                 <p>{org.description}</p>
                 <p>{org.location}</p>
@@ -89,7 +93,9 @@ export class Dashboard extends React.Component {
         if (this.props.activeOrg) {
             return <div className='row'>
                 <div className='col-md-6 col-sm-12'>
-                    {this.state.org}
+                    <div className='cbox'>
+                        {this.state.org}
+                    </div>
                 </div>
                 <div className='col-md-6 col-sm-12'>
                     <div className='cbox'>
